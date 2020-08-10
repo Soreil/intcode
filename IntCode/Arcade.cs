@@ -53,8 +53,27 @@ namespace IntCode
         }
 
         public int BlockCount() => Screen.Where((x) => x.t == Tile.block).Count();
+        public void Play()
+        {
+            (long x, long y, Tile t) paddle = (0, 0, Tile.paddle);
+            while (true)
+            {
+                GetUntilEndOrInputError();
+                int score = (int)Screen.Where((x) => x.x == -1 && x.y == 0).FirstOrDefault().t;
+                if (score != 0) Score = score;
+                if (Program.halted)
+                    return;
+                var ball = Screen.Where((x) => x.t == Tile.ball).First();
+                var possiblePaddle = Screen.Where((x) => x.t == Tile.paddle);
+                if (possiblePaddle.Count() != 0) paddle = possiblePaddle.First();
 
-        public void AddCoin()
+                int move = 0;
+                if (ball.x < paddle.x) move = -1;
+                if (ball.x > paddle.x) move = 1;
+                Program.AddInput(new List<long>() { move });
+            }
+        }
+        private void AddCoin()
         {
             Program.n[0] = 2;
         }
