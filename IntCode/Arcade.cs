@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace IntCode
 {
@@ -42,10 +41,14 @@ namespace IntCode
                     throw new Exception("Hit an input instruction instead of a triplet");
             return (trip[0], trip[1], (Tile)trip[2]);
         }
-        public void GetScreen()
+        public void GetUntilEndOrInputError()
         {
             List<(long x, long y, Tile t)> trips = new List<(long x, long y, Tile t)>();
-            while (!Program.halted) trips.Add(GetTriplet());
+            while (!Program.halted)
+            {
+                try { trips.Add(GetTriplet()); }
+                catch { break; }
+            }
             Screen = trips;
         }
 
