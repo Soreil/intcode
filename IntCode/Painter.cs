@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace IntCode
 {
@@ -15,7 +13,7 @@ namespace IntCode
 
         private HashSet<(int x, int y)> WasPainted;
 
-        enum Direction
+        public enum Direction
         {
             North,
             East,
