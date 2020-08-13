@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -43,12 +44,17 @@ namespace IntCode
                     _ => throw new NotImplementedException(),
                 };
         }
-        private static List<int> Neighbours(Point position, Dictionary<Point, int> distance) => new List<int>() {
+        private static List<int> NeighbourDistances(Point position, Dictionary<Point, int> distance) => new List<int>() {
                 distance.GetValueOrDefault(position + Direction.north),
                 distance.GetValueOrDefault(position + Direction.east),
                 distance.GetValueOrDefault(position + Direction.south),
                 distance.GetValueOrDefault(position + Direction.west),
                 }.Where((x) => x != 0).ToList();
+
+        private static List<Direction> UnvisitedNeighbours(Point position, HashSet<Point> visited)
+            => new List<Direction>() { Direction.north, Direction.east, Direction.south, Direction.west }
+            .Where((x) => !visited.Contains(position + x)).ToList();
+
 
         [Test]
         public void Puzzle15Part1()
@@ -65,26 +71,30 @@ namespace IntCode
                 //positions in the map. We just have to subtract 1 from the final result due to this.
                 [position] = 1
             };
+            Dictionary<Point, bool> visited = new Dictionary<Point, bool>
+            {
+                [position] = true
+            };
 
             p.output = (x) =>
-            {
-                switch ((Status)x)
                 {
-                    case Status.wall:
-                        break;
-                    case Status.moved:
-                        position += direction;
-                        distance[position] = Neighbours(position, distance).Min();
-                        break;
-                    case Status.oxygen:
-                        position += direction;
-                        distance[position] = Neighbours(position, distance).Min();
-                        break;
-                }
+                    switch ((Status)x)
+                    {
+                        case Status.wall:
+                            break;
+                        case Status.moved:
+                            position += direction;
+                            distance[position] = NeighbourDistances(position, distance).Min() + 1;
+                            break;
+                        case Status.oxygen:
+                            position += direction;
+                            distance[position] = NeighbourDistances(position, distance).Min() + 1;
+                            break;
+                    }
 
-                //We have to implement some logic to decide what we want the robot to do.
-                p.AddInput(new List<long>() { (long)direction });
-            };
+                    //We have to implement some logic to decide what we want the robot to do.
+                    p.AddInput(new List<long>() { });
+                };
 
             //Initial state, it expects an input before it starts the infinite loop
             p.AddInput(new List<long>() { (long)direction });
