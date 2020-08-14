@@ -7,7 +7,7 @@ namespace IntCode
     {
         public readonly List<long> n;
         private readonly Dictionary<long, Mode> modes;
-        public Queue<long> input;
+        public Queue<long> Input;
         public Action<long> output;
         public long relativeBaseOffset;
         public bool halted;
@@ -22,7 +22,7 @@ namespace IntCode
         {
             n = new List<long>();
             modes = new Dictionary<long, Mode>();
-            input = new Queue<long>();
+            Input = new Queue<long>();
             AddInput(inputs);
             output = outputs;
             halted = false;
@@ -110,12 +110,12 @@ namespace IntCode
                     Arithmetic((x, y) => x * y);
                     break;
                 case OpCode.Input:
-                    if (input.Count == 0)
+                    if (Input.Count == 0)
                     {
                         PC--; //We will have to retry, dirty hack for now.
                         return true;
                     }
-                    Store(input.Dequeue(), 0);
+                    Store(Input.Dequeue(), 0);
                     PC += 1;
                     break;
                 case OpCode.Output:
@@ -185,7 +185,9 @@ namespace IntCode
         internal void AddInput(List<long> inputs)
         {
             foreach (var i in inputs)
-                input.Enqueue(i);
+                AddInput(i);
         }
+
+        internal void AddInput(long input) => Input.Enqueue(input);
     }
 }

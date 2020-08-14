@@ -213,7 +213,7 @@ namespace IntCode
                 {
                     if (!amp.halted)
                         amp.Run();
-                    else return firstAmplifyer.input.Peek();
+                    else return firstAmplifyer.Input.Peek();
                 }
             throw new Exception("Expected to quit in the loop");
         }
