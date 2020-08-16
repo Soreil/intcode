@@ -10,7 +10,7 @@ namespace IntCode
         public Score() : base()
         { }
 
-        public int this[Point p]
+        public new int this[Point p]
         {
             get
             {
@@ -127,7 +127,7 @@ namespace IntCode
         public void LongPathObstacles()
         {
             Point start = new Point(0, 0);
-            Point end = new Point(1,3);
+            Point end = new Point(1, 3);
 
             HashSet<Point> points = new HashSet<Point> { start, end };
 

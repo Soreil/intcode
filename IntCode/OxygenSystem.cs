@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
@@ -13,7 +12,7 @@ namespace IntCode
         Dictionary<Point, int> distance;
         HashSet<Point> wall;
         HashSet<Point> visited;
-        OxygenSystem()
+        public OxygenSystem()
         {
             distance = new Dictionary<Point, int>
             {
