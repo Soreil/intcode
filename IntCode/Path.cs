@@ -28,7 +28,7 @@ namespace IntCode
     {
         readonly Func<Point, IEnumerable<Point>> Neighbours;
         readonly Func<Point, Point, int> D;
-        //We need to allow input of the tables to look up points
+
         public Path(Func<Point, IEnumerable<Point>> neighbours, Func<Point, Point, int> d)
         {
             Neighbours = neighbours;
@@ -99,16 +99,78 @@ namespace IntCode
 
             Func<Point, int> h = (x) => Distance(end, x);
 
-            Path p = new Path(p1 => neighbours(p1, points), Distance);
+            Path p = new Path(p1 => Neighbours(p1, points), Distance);
             var moves = p.A_Star(start, end, h);
             foreach (var m in moves) Console.WriteLine(m.X.ToString() + ", " + m.Y.ToString());
-            Assert.AreEqual(1, moves.Count);
+            Assert.AreEqual(2, moves.Count);
+        }
+        [Test]
+        public void LongPathNoObstacles()
+        {
+            Point start = new Point(0, 0);
+            Point end = new Point(10, 20);
+
+            HashSet<Point> points = new HashSet<Point> { start, end };
+
+            for (int y = -30; y < 30; y++)
+                for (int x = -30; x < 30; x++)
+                    points.Add(new Point(x, y));
+
+            Func<Point, int> h = (x) => Distance(end, x);
+
+            Path p = new Path(p1 => Neighbours(p1, points), Distance);
+            var moves = p.A_Star(start, end, h);
+            foreach (var m in moves) Console.WriteLine(m.X.ToString() + ", " + m.Y.ToString());
+        }
+
+        [Test]
+        public void LongPathObstacles()
+        {
+            Point start = new Point(0, 0);
+            Point end = new Point(1,3);
+
+            HashSet<Point> points = new HashSet<Point> { start, end };
+
+            for (int y = 0; y < 30; y++)
+                for (int x = 0; x < 30; x++)
+                    points.Add(new Point(x, y));
+
+            foreach (var pt in new List<Point> { new Point(2, 0), new Point(0, 2), new Point(1, 2), new Point(2, 2) })
+                points.Remove(pt);
+
+            Func<Point, int> h = (x) => Distance(end, x);
+
+            Path p = new Path(p1 => Neighbours(p1, points), Distance);
+            var moves = p.A_Star(start, end, h);
+            foreach (var m in moves) Console.WriteLine(m.X.ToString() + ", " + m.Y.ToString());
+        }
+
+        [Test]
+        public void LongPathDifferentHueristicNoObstacles()
+        {
+            Point start = new Point(0, 0);
+            Point end = new Point(10, 20);
+
+            HashSet<Point> points = new HashSet<Point> { start, end };
+
+            for (int y = -0; y < 30; y++)
+                for (int x = -0; x < 30; x++)
+                    points.Add(new Point(x, y));
+
+            Func<Point, int> h = (x) => Distance2(end, x);
+
+            Path p = new Path(p1 => Neighbours(p1, points), Distance);
+            var moves = p.A_Star(start, end, h);
+            foreach (var m in moves) Console.WriteLine(m.X.ToString() + ", " + m.Y.ToString());
         }
 
         private static int Distance(Point lhs, Point rhs) =>
                       Math.Abs(lhs.X - rhs.X) + Math.Abs(lhs.Y - rhs.Y);
 
-        private static IEnumerable<Point> neighbours(Point p, HashSet<Point> points) =>
+        private static int Distance2(Point lhs, Point rhs) =>
+                      (int)Math.Round(Math.Sqrt(Math.Pow(Math.Abs(lhs.X - rhs.X), 2) + Math.Pow(Math.Abs(lhs.Y - rhs.Y), 2)));
+
+        private static IEnumerable<Point> Neighbours(Point p, HashSet<Point> points) =>
                     new List<Point> {
                 new Point(p.X-1,p.Y),
                 new Point(p.X,p.Y-1),
