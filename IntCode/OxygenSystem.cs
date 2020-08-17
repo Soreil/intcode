@@ -9,18 +9,10 @@ namespace IntCode
     {
         Direction direction = Direction.north;
         Point position = new Point(0, 0);
-        Dictionary<Point, int> distance;
         HashSet<Point> wall;
         HashSet<Point> visited;
         public OxygenSystem()
         {
-            distance = new Dictionary<Point, int>
-            {
-                //ugly hack to ignore the fact we are using default value for not yet visited
-                //positions in the map. We just have to subtract 1 from the final result due to this.
-                [position] = 1
-            };
-
             wall = new HashSet<Point>();
 
             visited = new HashSet<Point>
@@ -43,16 +35,14 @@ namespace IntCode
             west = 4
         }
 
-        private static List<int> NeighbourDistances(Point position, Dictionary<Point, int> distance) => new List<int>() {
-                distance.GetValueOrDefault(position + Direction.north),
-                distance.GetValueOrDefault(position + Direction.east),
-                distance.GetValueOrDefault(position + Direction.south),
-                distance.GetValueOrDefault(position + Direction.west),
-                }.Where((x) => x != 0).ToList();
-
         private static List<Direction> UnvisitedNeighbours(Point position, HashSet<Point> visited)
             => new List<Direction>() { Direction.north, Direction.east, Direction.south, Direction.west }
             .Where((x) => !visited.Contains(position + x)).ToList();
+
+        private static Point ClosestPointWithUnvisitedNeighbours(Point position, HashSet<Point> visited) 
+            =>visited.OrderBy((x) 
+                => PathTests.Distance(position, x)).Where((x) 
+                => UnvisitedNeighbours(x, visited).Any()).First();
 
 
         [Test]
@@ -70,26 +60,32 @@ namespace IntCode
                             break;
                         case Status.moved:
                             position += direction;
-                            distance[position] = NeighbourDistances(position, distance).Min() + 1;
+                            visited.Add(position);
                             break;
                         case Status.oxygen:
                             position += direction;
-                            distance[position] = NeighbourDistances(position, distance).Min() + 1;
-                            Console.WriteLine(distance[position].ToString());
-                            Assert.Pass();
+                            var p = new Path(start => PathTests.Neighbours(start, visited), PathTests.Distance);
+                            Func<Point, int> h = (x) => PathTests.Distance(position, x);
+
+                            var finalPath = p.A_Star(new Point(0, 0), position, h);
+                            Console.WriteLine(finalPath.Count);
+                            Assert.Fail();
                             break;
                     }
 
-                    var neighbours = UnvisitedNeighbours(position, visited.Union(wall).ToHashSet());
-                    if (neighbours.Any())
-                        p.AddInput((long)neighbours.First());
-                    else //We are going to have to backtrack to a previous point. Alternatively we could replay up to that point.
-                    //Currently we don't really have a map of the world which would make navigation viable since we don't record where obstacles are.
-                    //An actual pathfinding algorithm would be needed if we include obstacles.
+                    if (p.Input.Count == 0)
                     {
-
+                        var neighbours = UnvisitedNeighbours(position, visited.Union(wall).ToHashSet());
+                        if (neighbours.Any())
+                            p.AddInput((long)neighbours.First());
+                        else //We are going to have to backtrack to a previous point. Alternatively we could replay up to that point.
+                             //Currently we don't really have a map of the world which would make navigation viable since we don't record where obstacles are.
+                             //An actual pathfinding algorithm would be needed if we include obstacles.
+                        {
+                            var backtrackDestination = ClosestPointWithUnvisitedNeighbours(position, visited);
+                            
+                        }
                     }
-
                 };
 
             //Initial state, it expects an input before it starts the infinite loop

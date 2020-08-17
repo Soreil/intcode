@@ -164,13 +164,13 @@ namespace IntCode
             foreach (var m in moves) Console.WriteLine(m.X.ToString() + ", " + m.Y.ToString());
         }
 
-        private static int Distance(Point lhs, Point rhs) =>
+        public static int Distance(Point lhs, Point rhs) =>
                       Math.Abs(lhs.X - rhs.X) + Math.Abs(lhs.Y - rhs.Y);
 
         private static int Distance2(Point lhs, Point rhs) =>
                       (int)Math.Round(Math.Sqrt(Math.Pow(Math.Abs(lhs.X - rhs.X), 2) + Math.Pow(Math.Abs(lhs.Y - rhs.Y), 2)));
 
-        private static IEnumerable<Point> Neighbours(Point p, HashSet<Point> points) =>
+        public static IEnumerable<Point> Neighbours(Point p, HashSet<Point> points) =>
                     new List<Point> {
                 new Point(p.X-1,p.Y),
                 new Point(p.X,p.Y-1),
